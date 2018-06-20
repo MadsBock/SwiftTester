@@ -41,7 +41,7 @@ move_uploaded_file($tmp, $newPos);
                 }
                 console.log(details)
                 details.html(data[1]).css("background-color", color).slideDown()
-            })
+            }, "json")
         })
     }
 

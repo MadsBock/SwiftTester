@@ -10,7 +10,7 @@ if($output = shell_exec($cmd)) {
     $lines = explode("\n", $output);
     $outputLines = explode("\n", file_get_contents($outputFile));
     $header = "success";
-    for($i = 0; $i < len($lines); $i++) {
+    for($i = 0; $i < count($lines); $i++) {
         if($lines[$i] != $outputLines[$i]) {
             $output = "Expected '$outputLines[$i]' but got '$lines[$i]'";
             $header = "error";
@@ -18,7 +18,7 @@ if($output = shell_exec($cmd)) {
         }
     }
     if($header == "success") {
-        $output = "";
+        $output = "Test Successful!";
     }
 } else {
     $output = implode("<br>", explode("\n", file_get_contents($errorFile)));
