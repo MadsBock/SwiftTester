@@ -10,29 +10,38 @@ move_uploaded_file($tmp, $newPos);
     .butTemp {
         display: none;
     }
+    #details {
+        padding: 5px;
+        margin-top: 10px;
+    }
 </style>
-<button class="butTemp but">Kør Test</button>
+<div class="butTemp">
+    <button class="but">Kør Test</button>
+    <div id="details" style="display: none"></div>
+</div>
 
 <script src="jquery.js"></script>
 
 <script>
     function makeButton(inputF, outputF) {
 
-        $(".butTemp").clone().removeClass("butTemp").appendTo("body").click(function() {
+        $(".butTemp").clone().removeClass("butTemp").appendTo("body").find("button").click(function() {
             console.log("Works")
             var params = {
                 filename: "<?= $newPos ?>",
                 inputFile: inputF,
                 outputFile: outputF
             }
-            var target = $(this)
+            var details = $(this).siblings("#details").slideUp()
             $.post("verifySwift.php", params, function(data, status) {
                 var color = "red"
+                console.log(data)
                 if(data[0] == "success") {
                     color = "lightgreen"
                 }
-                target.html(data[1]).css("color", color)
-            }, "json")
+                console.log(details)
+                details.html(data[1]).css("background-color", color).slideDown()
+            })
         })
     }
 
