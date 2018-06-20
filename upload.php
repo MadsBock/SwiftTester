@@ -6,36 +6,48 @@ $datetime = time();
 $newPos = "scripts/uploads/$datetime".".swift";
 move_uploaded_file($tmp, $newPos);
 ?>
-
-<p id="successBlock" style="background-color: lightgreen; display: none"></p>
-<p id="errorBlock" style="background-color: red; display: none"></p>
+<style>
+    .butTemp {
+        display: none;
+    }
+</style>
+<button class="butTemp but">Kør Test</button>
 
 <script src="jquery.js"></script>
 
 <script>
-    $(document).ready(function() {
-        var params = {
-            filename: "<?= $newPos ?>",
-            id: <?= $id ?>
-        }
-        console.log(params)
-        $.post("verifySwift.php", params, function(data, status) {
-            console.log(data)
-            console.log(data[0])
-            if(data[0] == "success") {
-                console.log("success")
-                for (let i = 1; i < data.length; i++) {
-                    const element = data[i];
-                    $("#successBlock").clone().appendTo("body").html(element).fadeIn()
-                }
+    function makeButton(inputF, outputF) {
 
-            } else {
-                console.log("Error")
-                for(let i = 1; i < data.length; i++) {
-                    const element = data[i]
-                    $("#errorBlock").clone().appendTo("body").html(element).fadeIn()
-                }
+        $(".butTemp").clone().removeClass("butTemp").appendTo("body").click(function() {
+            console.log("Works")
+            var params = {
+                filename: "<?= $newPos ?>",
+                inputFile: inputF,
+                outputFile: outputF
             }
-        }, "json")
-    })
+            var target = $(this)
+            $.post("verifySwift.php", params, function(data, status) {
+                var color = "red"
+                if(data[0] == "success") {
+                    color = "lightgreen"
+                }
+                target.html(data[1]).css("color", color)
+            }, "json")
+        })
+    }
+
+<?php
+include "mysql.php";
+$sql = "SELECT inputFilePath AS inp, outputFilePath AS oup FROM verificationPair WHERE assignmentID = $id";
+if($result = $conn->query($sql)) {
+    while($row = $result->fetch_assoc()) {
+        $inputFile = $row["inp"];
+        $outputFile = $row["oup"];
+        echo "makeButton('$inputFile', '$outputFile');";
+    }
+} else {
+    echo $conn->error . "\n";
+    echo $sql;
+}
+?>
 </script>

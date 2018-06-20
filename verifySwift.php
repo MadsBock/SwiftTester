@@ -1,23 +1,28 @@
 <?php
 
 $filePath = $_POST["filename"];
-$id = $_POST["id"];
-$errorFile = "error.log";
-include 'mysql.php';
+$inputFile = $_POST["inputFile"];
+$outputFile = $_POST["outputFile"];
+$errorFile = "scripts/error.log";
 
-$sql = "SELECT inputFilePath AS input FROM verificationPair WHERE assignmentID = $id;";
-$result = $conn->query($sql) or die ("Query Failed");
-$row = $result->fetch_assoc();
-$inputPath = $row["input"];
-
-$cmd = "swift $filePath < $inputPath 2>$errorFile";
+$cmd = "swift $filePath < $inputFile 2> $errorFile";
 if($output = shell_exec($cmd)) {
     $lines = explode("\n", $output);
+    $outputLines = explode("\n", file_get_contents($outputFile));
     $header = "success";
+    for($i = 0; $i < len($lines); $i++) {
+        if($lines[$i] != $outputLines[$i]) {
+            $output = "Expected '$outputLines[$i]' but got '$lines[$i]'";
+            $header = "error";
+            break;
+        }
+    }
+    if($header == "success") {
+        $output = "";
+    }
 } else {
-    $lines = [implode("<br>", explode("\n", file_get_contents($errorFile)))];
+    $output = implode("<br>", explode("\n", file_get_contents($errorFile)));
     $header = "error";
 }
-$lines = array_merge([$header], $lines);
-unlink($errorFile);
-echo json_encode($lines);
+
+echo json_encode([$header,$output]);
